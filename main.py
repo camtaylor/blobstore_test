@@ -18,6 +18,7 @@ from time import sleep
 class BlobHolder(ndb.Model):
   upload_date = ndb.DateTimeProperty(auto_now_add=True)
   blob_key = ndb.BlobKeyProperty()
+  size = ndb.FloatProperty()
 
 class FileUploadFormHandler(webapp2.RequestHandler):
   '''
@@ -36,6 +37,7 @@ class BlobUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     uploaded_blob = BlobHolder()
     upload = self.get_uploads()[0]
     uploaded_blob.blob_key = upload.key()
+    uploaded_blob.size = upload.size / 1048576
     uploaded_blob.put()
     self.response.out.write("blob written")
 

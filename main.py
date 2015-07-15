@@ -16,7 +16,7 @@ from time import sleep
 
 
 class BlobHolder(ndb.Model):
-  upload_date = ndb.DateTimeProperty()
+  upload_date = ndb.DateTimeProperty(auto_now_add=True)
   blob_key = ndb.BlobKeyProperty()
 
 class FileUploadFormHandler(webapp2.RequestHandler):
@@ -25,24 +25,19 @@ class FileUploadFormHandler(webapp2.RequestHandler):
   '''
   def get(self):
     upload_url = blobstore.create_upload_url('/create')
-    self.response.out.write('<html><body>')
-    self.response.out.write('<form action="%s" method="POST" enctype="multipart/form-data">' % upload_url)
-    self.response.out.write('''Upload File: <input type="file" name="file"><br> <input type="submit"
-          name="submit" value="Submit"> </form></body></html>''')
+    self.response.out.write(upload_url)
 
-class BlobUploadHandler(webapp2.RequestHandler, blobstore_handlers.BlobstoreUploadHandler):
+class BlobUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
   '''
   Posts to database the uploaded blob 
 
   '''
   def post(self):
-
-    uploaded_blob.upload_date = datetime.datetime.now() - datetime.timedelta(hours=7)
-    
+    uploaded_blob = BlobHolder()
     upload = self.get_uploads()[0]
     uploaded_blob.blob_key = upload.key()
     uploaded_blob.put()
-    self.redirect('/')
+    self.response.out.write("blob written")
 
 app = webapp2.WSGIApplication([
                                 ('/', FileUploadFormHandler),
